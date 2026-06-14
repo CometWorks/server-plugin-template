@@ -37,6 +37,27 @@ _Good luck!_
 
 ## Remarks
 
+### Plugin version
+
+The plugin version lives in `Version.Build.props`, which **is** committed and imported by
+`Directory.Build.props`. Keeping the version separate from the local path overrides means it
+is shared by all contributors and stays under version control. Bump the version there.
+
+### Folder path overrides
+
+`Directory.Build.props.template` is a template for `Directory.Build.props`. The latter is a
+local config file you can use to override the reference folder paths (`Bin64` for the Space
+Engineers client, `Pulsar` and `Magnetar` for the two plugin loaders, and `Dedicated64` for
+the Dedicated Server). It is **not committed** to the repository, so each contributor keeps
+their own local paths.
+
+`setup.py` copies `Directory.Build.props.template` to `Directory.Build.props` if the latter
+does not exist yet, then fills in the auto-detected paths. Because the override is not
+committed, anyone else who clones the repo and runs `setup.py` gets their own
+`Directory.Build.props` with paths properly auto-detected for their machine. Leaving a path
+empty in `Directory.Build.props` falls back to the platform-specific auto-detection further
+down in the same file (Windows and Linux), so the build works on both operating systems.
+
 ### Plugin configuration
 
 You can have a nice configuration dialog with little effort in the game client.
