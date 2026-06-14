@@ -310,7 +310,7 @@
   <PropertyGroup>
     <PublicizerClearCacheOnClean>true</PublicizerClearCacheOnClean>
     <PublicizerRuntimeStrategies>Unsafe;IgnoresAccessChecksTo</PublicizerRuntimeStrategies>
-    <PublicizerLogFilePath>$(MSBuildProjectDirectory)\$(OutputPath)Krafs.Publicizer.log</PublicizerLogFilePath>
+    <PublicizerLogFilePath>$(MSBuildProjectDirectory)\Krafs.Publicizer.$(TargetFramework).log</PublicizerLogFilePath>
   </PropertyGroup>
 
   <ItemGroup>
