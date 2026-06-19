@@ -1,6 +1,6 @@
 # Space Engineers Plugin Template
 
-[Client only version of the template](https://github.com/viktor-ferenczi/se-client-plugin-template)
+[Client only version of this template](https://github.com/CometWorks/client-plugin-template)
 
 ## Prerequisites
 
