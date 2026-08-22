@@ -45,18 +45,20 @@ is shared by all contributors and stays under version control. Bump the version 
 
 ### Folder path overrides
 
-`Directory.Build.props.template` is a template for `Directory.Build.props`. The latter is a
-local config file you can use to override the reference folder paths (`Bin64` for the Space
-Engineers client, `Pulsar` and `Magnetar` for the two plugin loaders, and `Dedicated64` for
-the Dedicated Server). It is **not committed** to the repository, so each contributor keeps
-their own local paths.
+`Directory.Build.props` **is** committed and holds the reference folder paths (`Bin64` for
+the Space Engineers client, `Pulsar` and `Magnetar` for the two plugin loaders, and
+`Dedicated64` for the Dedicated Server) empty, followed by the platform-specific
+auto-detection (Windows and Linux) which fills in whatever is left empty.
 
-`setup.py` copies `Directory.Build.props.template` to `Directory.Build.props` if the latter
-does not exist yet, then fills in the auto-detected paths. Because the override is not
-committed, anyone else who clones the repo and runs `setup.py` gets their own
-`Directory.Build.props` with paths properly auto-detected for their machine. Leaving a path
-empty in `Directory.Build.props` falls back to the platform-specific auto-detection further
-down in the same file (Windows and Linux), so the build works on both operating systems.
+To override any of them locally, copy the first `PropertyGroup` of `Directory.Build.props`
+into `Directory.Build.props.user` in the repo root, wrapped in a top-level `<Project>`
+element, and fill in your paths there. That file is git-ignored (`*.user`), so each
+contributor keeps their own local paths and nobody's paths end up in the repository.
+
+`setup.py` creates `Directory.Build.props.user` if it does not exist yet, then fills in the
+auto-detected `Bin64` and `Dedicated64` paths. Paths left empty there (or a missing file)
+fall back to the auto-detection in `Directory.Build.props`, so the build works on both
+operating systems without any local config at all.
 
 ### Plugin configuration
 

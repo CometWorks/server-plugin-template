@@ -1,28 +1,35 @@
 <Project>
-    <!-- Plugin version (committed, shared by all contributors) -->
-    <Import Project="Version.Build.props" />
-
+    <!-- Reference folder paths, overridable by Directory.Build.props.user -->
     <PropertyGroup>
         <!-- Folder containing SpaceEngineers.exe.
-             Fill the path between the tags to override; leave empty to use the
-             platform-specific auto-detection below. -->
+             Leave empty to use the platform-specific auto-detection below. -->
         <Bin64></Bin64>
 
         <!-- Folder containing the Pulsar installation (the directory that holds
-             Libraries/Legacy/PluginSdk.dll). Fill the path between the tags to override;
-             leave empty to use the platform-specific auto-detection below. -->
+             Libraries/Legacy/PluginSdk.dll).
+             Leave empty to use the platform-specific auto-detection below. -->
         <Pulsar></Pulsar>
 
         <!-- Folder containing the Magnetar installation (the directory that holds
-             Bin/PluginSdk.dll). Fill the path between the tags to override; leave
-             empty to use the platform-specific auto-detection below. -->
+             Bin/PluginSdk.dll).
+             Leave empty to use the platform-specific auto-detection below. -->
         <Magnetar></Magnetar>
 
         <!-- Folder containing SpaceEngineersDedicated.exe.
-             Fill the path between the tags to override; leave empty to use the
-             platform-specific auto-detection below. -->
+             Leave empty to use the platform-specific auto-detection below. -->
         <Dedicated64></Dedicated64>
     </PropertyGroup>
+
+    <!-- Plugin version (committed, shared by all contributors) -->
+    <Import Project="Version.Build.props" />
+
+    <!-- Local developer overrides for the folder paths above; ignored by Git (*.user).
+         Copy the PropertyGroup above into Directory.Build.props.user, wrapped in a
+         top-level <Project> element, and fill in your local paths there. setup.py
+         creates and fills that file for you. Paths left empty there (or a missing
+         file) fall back to the auto-detection below. -->
+    <Import Project="$(MSBuildThisFileDirectory)Directory.Build.props.user"
+            Condition="Exists('$(MSBuildThisFileDirectory)Directory.Build.props.user')" />
 
     <!-- Repository root (this file lives in it). Used instead of $(SolutionDir) so
          the PreBuildEvent scripts are found whether the build is driven from the
