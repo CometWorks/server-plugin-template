@@ -45,20 +45,65 @@ is shared by all contributors and stays under version control. Bump the version 
 
 ### Folder path overrides
 
-`Directory.Build.props` **is** committed and holds the reference folder paths (`Bin64` for
-the Space Engineers client, `Pulsar` and `Magnetar` for the two plugin loaders, and
-`Dedicated64` for the Dedicated Server) empty, followed by the platform-specific
-auto-detection (Windows and Linux) which fills in whatever is left empty.
+`Directory.Build.props` **is** committed and declares the overridable folder paths with empty
+defaults:
 
-To override any of them locally, copy the first `PropertyGroup` of `Directory.Build.props`
-into `Directory.Build.props.user` in the repo root, wrapped in a top-level `<Project>`
-element, and fill in your paths there. That file is git-ignored (`*.user`), so each
-contributor keeps their own local paths and nobody's paths end up in the repository.
+- `Bin64` — the folder containing `SpaceEngineers.exe`
+- `Dedicated64` — the folder containing `SpaceEngineersDedicated.exe`
+- `Pulsar` — the Pulsar folder the client plugin is deployed into after each build
+- `Magnetar` — the Magnetar installation folder, the one holding the launcher executables
+  and their `Libraries`, which is where `PluginSdk.dll` is referenced from
+- `MagnetarData` — the Magnetar config folder the server plugin is deployed into, the one
+  holding `Local`, `Sources` and `Profiles`
 
-`setup.py` creates `Directory.Build.props.user` if it does not exist yet, then fills in the
-auto-detected `Bin64` and `Dedicated64` paths. Paths left empty there (or a missing file)
-fall back to the auto-detection in `Directory.Build.props`, so the build works on both
-operating systems without any local config at all.
+It optionally imports `Directory.Build.props.user` from the repository root, which is **not
+committed** (matched by `*.user` in `.gitignore`), so each contributor keeps their own local
+paths there.
+
+To override a path manually, copy the first `PropertyGroup` of `Directory.Build.props` into
+`Directory.Build.props.user`, wrapped into a top-level `<Project>` element, and fill in your
+paths. `setup.py` writes that file for you with the auto-detected install locations, creating
+it if needed and keeping any other overrides already in it.
+
+Leaving a path empty (or having no `Directory.Build.props.user` at all) falls back to the
+auto-detection in `Directory.Build.props`, which reads the Steam registry keys on Windows and
+the usual Steam locations on Linux, then resolves the game and the Dedicated Server through
+Steam's `libraryfolders.vdf`, so installs on a secondary Steam library are found as well.
+
+| Loader folder  | Windows                                        | Linux                                             |
+|----------------|------------------------------------------------|---------------------------------------------------|
+| `Pulsar`       | `%AppData%\Pulsar`                             | `$XDG_CONFIG_HOME/Pulsar` (`~/.config/Pulsar`)    |
+| `Magnetar`     | the `Magnetar\` tree next to the server install | `$XDG_DATA_HOME/Magnetar` (`~/.local/share/Magnetar`) |
+| `MagnetarData` | `<Magnetar>\MagnetarLegacy` or `\MagnetarInterim`, named after the launcher | `$XDG_CONFIG_HOME/Magnetar` (`~/.config/Magnetar`) |
+
+The build fails with a clear message if `Bin64`, `Dedicated64` or Magnetar's `PluginSdk.dll`
+cannot be resolved, and warns instead of failing if a loader folder is missing, in which case
+that plugin is only built, not deployed.
+
+### Deployment
+
+Each successful build copies itself into its loader's `Local` plugin folder, so there is
+nothing to run by hand:
+
+| Project        | Build     | Deployed to                                       |
+|----------------|-----------|---------------------------------------------------|
+| `ClientPlugin` | `net48`   | `<Pulsar>/Legacy/Local/<PluginName>/`             |
+| `ClientPlugin` | `net10.0` | `<Pulsar>/Interim/Local/<PluginName>/`            |
+| `ServerPlugin` | `net48`   | `<Magnetar>/MagnetarLegacy/Local/` (Windows only) |
+| `ServerPlugin` | `net10.0` | `<MagnetarData>/Local/`                           |
+
+Pulsar identifies a plugin by its folder, so the client DLL is copied as `plugin.dll`, its
+symbols as `plugin.pdb` and the PluginHub registration XML from the repository root as
+`plugin.xml`. Magnetar identifies a plugin by its DLL file name, so the server plugin is
+copied flat as `<PluginName>.dll`, with the MagnetarHub registration XML next to it as
+`<PluginName>.dll.xml`. Either way the loader shows the plugin under its friendly name and
+honours the runtime and platform restrictions declared in the XML.
+
+`Interim` is the Pulsar executable running Space Engineers 1 on .NET 10. It falls back to the
+`Legacy` data folder when `<Pulsar>/Interim` does not exist, and so does the deployment.
+(`<Pulsar>/Modern` belongs to Space Engineers 2 and is never a deployment target here.)
+`MagnetarInterim` is its dedicated server counterpart and falls back the same way. On Linux
+only the Interim launchers exist, so only the `net10.0` build is made.
 
 ### Plugin configuration
 
@@ -133,8 +178,8 @@ Please consider using [se-dev-skills](https://github.com/viktor-ferenczi/se-dev-
 
 - If the IDE looks confused, then restarting it and the debugged game usually works.
 - If the restart did not work, then try to delete caches used by your IDE and restart.
-- If your build cannot deploy (just runs in a loop), then something locks the DLL file.
-- Look for running game processes (maybe stuck running in the background) and kill them.
+- If your build fails to copy the plugin into the `Local` folder, then something locks the DLL file.
+- Look for running game or server processes (maybe stuck running in the background) and kill them.
 
 ### Release
 

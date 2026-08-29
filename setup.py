@@ -37,25 +37,22 @@ USER_PROPS = "Directory.Build.props.user"
 
 USER_PROPS_TEMPLATE = """\
 <Project>
-    <PropertyGroup>
-        <!-- Folder containing SpaceEngineers.exe.
-             Leave empty to use the auto-detection in Directory.Build.props. -->
-        <Bin64></Bin64>
+  <PropertyGroup>
+    <!-- Folder containing SpaceEngineers.exe (empty = auto-detect from Steam) -->
+    <Bin64>{bin64}</Bin64>
 
-        <!-- Folder containing the Pulsar installation (the directory that holds
-             Libraries/Legacy/PluginSdk.dll).
-             Leave empty to use the auto-detection in Directory.Build.props. -->
-        <Pulsar></Pulsar>
+    <!-- Folder containing SpaceEngineersDedicated.exe (empty = auto-detect from Steam) -->
+    <Dedicated64>{dedicated64}</Dedicated64>
 
-        <!-- Folder containing the Magnetar installation (the directory that holds
-             Bin/PluginSdk.dll).
-             Leave empty to use the auto-detection in Directory.Build.props. -->
-        <Magnetar></Magnetar>
+    <!-- Pulsar plugin loader folder used for automatic deployment (empty = auto-detect) -->
+    <Pulsar></Pulsar>
 
-        <!-- Folder containing SpaceEngineersDedicated.exe.
-             Leave empty to use the auto-detection in Directory.Build.props. -->
-        <Dedicated64></Dedicated64>
-    </PropertyGroup>
+    <!-- Magnetar installation folder, holds the launchers (empty = auto-detect) -->
+    <Magnetar></Magnetar>
+
+    <!-- Magnetar config folder used for automatic deployment (empty = auto-detect) -->
+    <MagnetarData></MagnetarData>
+  </PropertyGroup>
 </Project>
 """
 
@@ -302,38 +299,46 @@ def _update_props(
     game_dir: str | None = None,
     server_dir: str | None = None,
 ) -> None:
+    """Write the detected paths into the git-ignored local overrides file."""
     if not game_dir and not server_dir:
         return
 
+    bin64_dir = str(Path(game_dir) / "Bin64") if game_dir else ""
+    dedicated64_dir = (
+        str(Path(server_dir) / "DedicatedServer64") if server_dir else ""
+    )
+
+    if not os.path.isfile(USER_PROPS):
+        with open(USER_PROPS, "w", encoding="UTF-8", newline="\n") as file:
+            file.write(
+                USER_PROPS_TEMPLATE.format(
+                    bin64=bin64_dir, dedicated64=dedicated64_dir
+                )
+            )
+        print(f"Created {USER_PROPS}")
+        return
+
+    # Keep any other overrides the developer may have added
     parser = ET.XMLParser(target=ET.TreeBuilder(insert_comments=True))
     tree = ET.parse(USER_PROPS, parser)
     root = tree.getroot()
+
     group = root.find("PropertyGroup")
-    assert group is not None
+    if group is None:
+        group = ET.SubElement(root, "PropertyGroup")
 
-    if game_dir:
-        _set_prop(group, "Bin64", str(Path(game_dir) / "Bin64"))
+    if bin64_dir:
+        _set_prop(group, "Bin64", bin64_dir)
 
-    if server_dir:
-        _set_prop(
-            group, "Dedicated64", str(Path(server_dir) / "DedicatedServer64")
-        )
+    if dedicated64_dir:
+        _set_prop(group, "Dedicated64", dedicated64_dir)
 
     tree.write(USER_PROPS)
-
-
-def _ensure_props() -> None:
-    """Create the local Directory.Build.props.user override if it is missing."""
-    if not os.path.isfile(USER_PROPS):
-        with open(USER_PROPS, "w", encoding="UTF-8", newline="\n") as file:
-            file.write(USER_PROPS_TEMPLATE)
-        print(f"Created {USER_PROPS}")
+    print(f"Updated {USER_PROPS}")
 
 
 def main() -> None:
     """Run the setup."""
-
-    _ensure_props()
 
     if os.path.isfile(f"{TEMPLATE_NAME}.sln"):
         plugin_name = _input_plugin_name()
