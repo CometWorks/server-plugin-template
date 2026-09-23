@@ -73,8 +73,8 @@ Steam's `libraryfolders.vdf`, so installs on a secondary Steam library are found
 | Loader folder  | Windows                                        | Linux                                             |
 |----------------|------------------------------------------------|---------------------------------------------------|
 | `Pulsar`       | `%AppData%\Pulsar`                             | `$XDG_CONFIG_HOME/Pulsar` (`~/.config/Pulsar`)    |
-| `Magnetar`     | the `Magnetar\` tree next to the server install | `$XDG_DATA_HOME/Magnetar` (`~/.local/share/Magnetar`) |
-| `MagnetarData` | `<Magnetar>\MagnetarLegacy` or `\MagnetarInterim`, named after the launcher | `$XDG_CONFIG_HOME/Magnetar` (`~/.config/Magnetar`) |
+| `Magnetar`     | the `Magnetar\` tree next to the server install | `$XDG_CONFIG_HOME/Magnetar` (`~/.config/Magnetar`) |
+| `MagnetarData` | `<Magnetar>\Magnetar`, shared by both launchers | `<Magnetar>/Magnetar`                             |
 
 The build fails with a clear message if `Bin64`, `Dedicated64` or Magnetar's `PluginSdk.dll`
 cannot be resolved, and warns instead of failing if a loader folder is missing, in which case
@@ -89,7 +89,6 @@ nothing to run by hand:
 |----------------|-----------|---------------------------------------------------|
 | `ClientPlugin` | `net48`   | `<Pulsar>/Legacy/Local/<PluginName>/`             |
 | `ClientPlugin` | `net10.0` | `<Pulsar>/Interim/Local/<PluginName>/`            |
-| `ServerPlugin` | `net48`   | `<Magnetar>/MagnetarLegacy/Local/` (Windows only) |
 | `ServerPlugin` | `net10.0` | `<MagnetarData>/Local/`                           |
 
 Pulsar identifies a plugin by its folder, so the client DLL is copied as `plugin.dll`, its
@@ -102,8 +101,11 @@ honours the runtime and platform restrictions declared in the XML.
 `Interim` is the Pulsar executable running Space Engineers 1 on .NET 10. It falls back to the
 `Legacy` data folder when `<Pulsar>/Interim` does not exist, and so does the deployment.
 (`<Pulsar>/Modern` belongs to Space Engineers 2 and is never a deployment target here.)
-`MagnetarInterim` is its dedicated server counterpart and falls back the same way. On Linux
-only the Interim launchers exist, so only the `net10.0` build is made.
+`MagnetarInterim` is its dedicated server counterpart, but Magnetar keeps one config folder
+for both of its launchers, `<Magnetar>/Magnetar`, so only one build of the server plugin can
+be deployed: the `net10.0` one, which is also the only one on Linux, where only the Interim
+launchers exist. Run the launcher with `-useHome` or `-config` and set `MagnetarData` to
+that folder to deploy there instead.
 
 ### Plugin configuration
 
