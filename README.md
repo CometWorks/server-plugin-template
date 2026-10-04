@@ -90,12 +90,15 @@ development folder, that stale copy can still be enabled and shadow the publishe
 your plugin.
 
 To deploy anyway, set the loader folders in `Directory.Build.props.user`, or pass them to a
-single build with `dotnet build -p:Pulsar=... -p:MagnetarData=...`:
+single build with `dotnet build -p:Pulsar=... -p:MagnetarData=...`. The usual values:
 
-| Property       | Windows                                          | Linux                          |
-|----------------|--------------------------------------------------|--------------------------------|
-| `Pulsar`       | `$(APPDATA)\Pulsar`                              | `$(HOME)/.config/Pulsar`       |
-| `MagnetarData` | `$(Magnetar)\Magnetar`, shared by both launchers | `$(Magnetar)/Magnetar`         |
+| Property       | Windows                 | Linux                    |
+|----------------|-------------------------|--------------------------|
+| `Pulsar`       | `$(APPDATA)\Pulsar`     | `$(HOME)/.config/Pulsar` |
+| `MagnetarData` | `$(Magnetar)\Magnetar`  | `$(Magnetar)/Magnetar`   |
+
+`$(Magnetar)` is the auto-detected Magnetar install folder. Its `Magnetar` subfolder holds
+the configuration, including `Local`, and both launchers (Legacy and Interim) use it.
 
 Each successful build then copies itself into its loader's `Local` plugin folder:
 
