@@ -18,8 +18,9 @@
 3. Run `setup.py`, enter the name of your plugin project in `CapitalizedWords` format
 4. Let `setup.py` auto-detect your install locations or fill them in manually
 5. Open the solution in Visual Studio or Rider
-6. Make a test build, it should deploy the resulting files to their respective target folders (see them in the build log)
-7. Test that the empty plugin can be enabled in Pulsar (client) and Magnetar (server)
+6. Make a test build
+7. Add the repository as a development folder to Pulsar (client) and Magnetar (server), then test that
+   the empty plugin can be enabled in both
 8. Replace the contents of this file with the description of your plugin
 9. Follow the TODO comments in the source code
 10. Look into the source code of other plugins for examples on how to patch the game
@@ -50,11 +51,12 @@ defaults:
 
 - `Bin64` — the folder containing `SpaceEngineers.exe`
 - `Dedicated64` — the folder containing `SpaceEngineersDedicated.exe`
-- `Pulsar` — the Pulsar folder the client plugin is deployed into after each build
+- `Pulsar` — the Pulsar folder the client plugin is deployed into after each build, empty by
+  default (see [Deployment](#deployment))
 - `Magnetar` — the Magnetar installation folder, the one holding the launcher executables
   and their `Libraries`, which is where `PluginSdk.dll` is referenced from
 - `MagnetarData` — the Magnetar config folder the server plugin is deployed into, the one
-  holding `Local`, `Sources` and `Profiles`
+  holding `Local`, `Sources` and `Profiles`, empty by default (see [Deployment](#deployment))
 
 It optionally imports `Directory.Build.props.user` from the repository root, which is **not
 committed** (matched by `*.user` in `.gitignore`), so each contributor keeps their own local
@@ -65,25 +67,37 @@ To override a path manually, copy the first `PropertyGroup` of `Directory.Build.
 paths. `setup.py` writes that file for you with the auto-detected install locations, creating
 it if needed and keeping any other overrides already in it.
 
-Leaving a path empty (or having no `Directory.Build.props.user` at all) falls back to the
-auto-detection in `Directory.Build.props`, which reads the Steam registry keys on Windows and
-the usual Steam locations on Linux, then resolves the game and the Dedicated Server through
-Steam's `libraryfolders.vdf`, so installs on a secondary Steam library are found as well.
-
-| Loader folder  | Windows                                        | Linux                                             |
-|----------------|------------------------------------------------|---------------------------------------------------|
-| `Pulsar`       | `%AppData%\Pulsar`                             | `$XDG_CONFIG_HOME/Pulsar` (`~/.config/Pulsar`)    |
-| `Magnetar`     | the `Magnetar\` tree next to the server install | `$XDG_CONFIG_HOME/Magnetar` (`~/.config/Magnetar`) |
-| `MagnetarData` | `<Magnetar>\Magnetar`, shared by both launchers | `<Magnetar>/Magnetar`                             |
+Leaving `Bin64`, `Dedicated64` or `Magnetar` empty (or having no `Directory.Build.props.user`
+at all) falls back to the auto-detection in `Directory.Build.props`, which reads the Steam
+registry keys on Windows and the usual Steam locations on Linux, then resolves the game and the
+Dedicated Server through Steam's `libraryfolders.vdf`, so installs on a secondary Steam library
+are found as well. `Magnetar` defaults to the `Magnetar\` tree next to the server install on
+Windows and to `$XDG_CONFIG_HOME/Magnetar` (`~/.config/Magnetar`) on Linux.
 
 The build fails with a clear message if `Bin64`, `Dedicated64` or Magnetar's `PluginSdk.dll`
-cannot be resolved, and warns instead of failing if a loader folder is missing, in which case
-that plugin is only built, not deployed.
+cannot be resolved.
+
+`Pulsar` and `MagnetarData` are never auto-detected. Leaving them empty turns off deployment.
 
 ### Deployment
 
-Each successful build copies itself into its loader's `Local` plugin folder, so there is
-nothing to run by hand:
+Builds don't deploy anything by default. Load your working copy through a development folder
+instead: start Pulsar or Magnetar with `-sources` and add it with the Sources button. The loader
+then compiles the plugin from source at startup.
+
+A deployed DLL shows up in the loader as a separate local plugin. If you later disable the
+development folder, that stale copy can still be enabled and shadow the published version of
+your plugin.
+
+To deploy anyway, set the loader folders in `Directory.Build.props.user`, or pass them to a
+single build with `dotnet build -p:Pulsar=... -p:MagnetarData=...`:
+
+| Property       | Windows                                          | Linux                          |
+|----------------|--------------------------------------------------|--------------------------------|
+| `Pulsar`       | `$(APPDATA)\Pulsar`                              | `$(HOME)/.config/Pulsar`       |
+| `MagnetarData` | `$(Magnetar)\Magnetar`, shared by both launchers | `$(Magnetar)/Magnetar`         |
+
+Each successful build then copies itself into its loader's `Local` plugin folder:
 
 | Project        | Build     | Deployed to                                       |
 |----------------|-----------|---------------------------------------------------|
