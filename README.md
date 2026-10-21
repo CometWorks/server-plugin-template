@@ -191,7 +191,7 @@ In case of problems read about the [Krafs Publicizer](https://github.com/krafs/P
 
 ### AI assisted plugin development
 
-Please consider using [se-dev-skills](https://github.com/viktor-ferenczi/se-dev-skills/) for better outcomes.
+Please consider using [CometWorks/skills](https://github.com/CometWorks/skills) for better outcomes.
 
 ### Troubleshooting
 
@@ -210,7 +210,7 @@ Please consider using [se-dev-skills](https://github.com/viktor-ferenczi/se-dev-
 
 - Register **client** plugins into [PluginHub](https://github.com/StarCpt/PluginHub/),
   so they become available in Pulsar.
-- Register **server** plugins into [MagnetarHub](https://github.com/viktor-ferenczi/MagnetarHub),
+- Register **server** plugins into [MagnetarHub](https://github.com/CometWorks/magnetar-hub),
   so they become available in Magnetar.
 
 ### Communication

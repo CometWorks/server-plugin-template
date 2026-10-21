@@ -120,6 +120,7 @@ def _rename_project(name: str) -> None:
         "A061FC6C-713E-42CD-B413-151AC8A5074C": _generate_guid().upper(),
         "FFB7FCA3-B168-43F4-8DBF-6247C0D331C8": _generate_guid().upper(),
         "C5784FE0-CF0A-4870-9DEF-7BEA8B64C01A": _generate_guid().upper(),
+        "188BD0B5-C10A-4672-9A68-B17267C81B9D": _generate_guid().upper(),
     }
 
     def iter_paths() -> Iterator[Tuple[str, str]]:
