@@ -12,13 +12,13 @@ using Shared.Plugin;
 using VRage.FileSystem;
 using VRage.Game;
 using VRage.Plugins;
-
 // Define assembly version when compiled by Pulsar
 #if !LOCAL_BUILD
 using System.Reflection;
 
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
+
 #endif
 
 namespace ClientPlugin;
@@ -39,7 +39,9 @@ public class Plugin : IPlugin, ICommonPlugin
     private PersistentConfig<PluginConfig> config;
     private static readonly string ConfigFileName = $"{Name}.cfg";
 
-    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    [System.Runtime.CompilerServices.MethodImpl(
+        System.Runtime.CompilerServices.MethodImplOptions.NoInlining
+    )]
     public void Init(object gameInstance)
     {
 #if DEBUG
@@ -90,7 +92,7 @@ public class Plugin : IPlugin, ICommonPlugin
 #if DEBUG
         CustomUpdate();
         Tick++;
-#else        
+#else
         try
         {
             CustomUpdate();
@@ -101,7 +103,7 @@ public class Plugin : IPlugin, ICommonPlugin
             Log.Critical(e, "Update failed");
             failed = true;
         }
-#endif       
+#endif
     }
 
     private void CustomUpdate()
@@ -116,7 +118,7 @@ public class Plugin : IPlugin, ICommonPlugin
         Instance.settingsGenerator.SetLayout<Simple>();
         MyGuiSandbox.AddScreen(Instance.settingsGenerator.Dialog);
     }
-        
+
     //TODO: Uncomment and use this method to load asset files
     /*public void LoadAssets(string folder)
     {
