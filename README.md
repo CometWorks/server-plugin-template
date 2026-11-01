@@ -133,9 +133,32 @@ options than can fit on the screen the dialog will have a vertical scrollbar.
 
 ![Example config dialog](Docs/ConfigDialogExample.png "Example config dialog")
 
+A new option may need a different default on a new deployment than on an existing one, for
+example to turn a feature on only for new users. `ConfigStorage.IsNewDeployment` tells them
+apart: it is `true` if the config file did not exist yet when the config was loaded, and it
+keeps that value after the first save writes the file. Use it as the option's default:
+
+```csharp
+private bool newOption = ConfigStorage.IsNewDeployment;
+```
+
+A config file written before the option existed has no value for it, so the option keeps that
+default, `false` in this case. A config file that exists but can't be read counts as an existing
+deployment too.
+
 The server plugin configuration works differently, please see the `Config` folder
 of the `Shared` project for that. The client side `Config` class is not integrated
 with the server side configuration, currently.
+
+`PersistentConfig<T>` has its own `IsNewDeployment` property with the same meaning, for its own
+config file. `Load` writes the file if it is missing, so the option's field initializer can't
+ask for it. Set the option right after loading instead, see the `Init` method of `Plugin`:
+
+```csharp
+if (config.IsNewDeployment) config.Data.NewOption = true;
+```
+
+The change is saved shortly after, as with any other change to the config.
 
 ### Shared project
 

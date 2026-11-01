@@ -20,6 +20,9 @@ public class PersistentConfig<T> : IDisposable
 
     private string Path { get; }
 
+    // True if the config file did not exist when it was loaded, which means a new deployment.
+    public bool IsNewDeployment { get; }
+
     public T Data
     {
         get => data;
@@ -35,10 +38,11 @@ public class PersistentConfig<T> : IDisposable
 
     ~PersistentConfig() => Dispose();
 
-    private PersistentConfig(string path, T data = null)
+    private PersistentConfig(string path, T data, bool isNewDeployment)
     {
         Path = path;
         Data = data;
+        IsNewDeployment = isNewDeployment;
     }
 
     private void SaveLater()
@@ -53,15 +57,17 @@ public class PersistentConfig<T> : IDisposable
 
     public static PersistentConfig<T> Load(IPluginLogger log, string path)
     {
+        var isNewDeployment = !File.Exists(path);
         try
         {
-            if (File.Exists(path))
+            if (!isNewDeployment)
             {
                 var xmlSerializer = new XmlSerializer(typeof(T));
                 using (var streamReader = File.OpenText(path))
                     return new PersistentConfig<T>(
                         path,
-                        (T)xmlSerializer.Deserialize(streamReader)
+                        (T)xmlSerializer.Deserialize(streamReader),
+                        false
                     );
             }
         }
@@ -82,7 +88,7 @@ public class PersistentConfig<T> : IDisposable
         }
 
         log.Info("Writing default configuration file: {0}", path);
-        var config = new PersistentConfig<T>(path, new T());
+        var config = new PersistentConfig<T>(path, new T(), isNewDeployment);
         config.Save();
         return config;
     }
