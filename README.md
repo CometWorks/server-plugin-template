@@ -171,6 +171,13 @@ The change is saved shortly after, as with any other change to the config.
 - You can delete the projects you don't need. If you want only a single project,
   then move over what is in the Shared one, then you can delete Shared.
 
+### Tests
+
+`Tests/PluginLoggerTests` checks that `PluginLogger` writes messages with braces in them,
+like `{X:512 Y:512}` or JSON, to the game log unchanged. It is not part of the solution.
+Run it with `dotnet run --project Tests/PluginLoggerTests`; it prints `PASS` or the lines
+that came out wrong. It needs the game's `Bin64` folder, found the same way as for the build.
+
 ### How to prevent the potential crash after game updates
 
 Please use the `EnsureCode` attribute on patch methods to safely skip loading the plugin
