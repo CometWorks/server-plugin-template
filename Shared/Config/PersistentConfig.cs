@@ -88,6 +88,9 @@ public class PersistentConfig<T> : IDisposable
         }
 
         log.Info("Writing default configuration file: {0}", path);
+        Directory.CreateDirectory(
+            System.IO.Path.GetDirectoryName(System.IO.Path.GetFullPath(path))
+        );
         var config = new PersistentConfig<T>(path, new T(), isNewDeployment);
         config.Save();
         return config;
