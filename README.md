@@ -146,13 +146,14 @@ A config file written before the option existed has no value for it, so the opti
 default, `false` in this case. A config file that exists but can't be read counts as an existing
 deployment too.
 
-The server plugin configuration works differently, please see the `Config` folder
-of the `Shared` project for that. The client side `Config` class is not integrated
-with the server side configuration, currently.
+Both targets use `Storage/<PluginName>.cfg` under their own game AppData folder.
+Define options used by both targets in `Shared/Config/PluginConfig.cs`. The client
+inherits those options and saves them with its client-only settings when the dialog
+closes.
 
-`PersistentConfig<T>` has its own `IsNewDeployment` property with the same meaning, for its own
-config file. `Load` writes the file if it is missing, so the option's field initializer can't
-ask for it. Set the option right after loading instead, see the `Init` method of `Plugin`:
+The dedicated server uses `PersistentConfig<T>`, which writes the default config
+if the file is missing. To set a server default that applies only to new deployments,
+check `IsNewDeployment` after loading in `ServerPlugin.Plugin.Init`:
 
 ```csharp
 if (config.IsNewDeployment) config.Data.NewOption = true;
@@ -177,6 +178,9 @@ The change is saved shortly after, as with any other change to the config.
 like `{X:512 Y:512}` or JSON, to the game log unchanged. It is not part of the solution.
 Run it with `dotnet run --project Tests/PluginLoggerTests`; it prints `PASS` or the lines
 that came out wrong. It needs the game's `Bin64` folder, found the same way as for the build.
+
+`dotnet run --project Tests/PersistentConfigTests` checks that loading a new server config
+creates `Storage` and that the resulting file loads again. It also needs `Bin64`.
 
 ### How to prevent the potential crash after game updates
 

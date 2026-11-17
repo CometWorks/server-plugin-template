@@ -50,7 +50,7 @@ public class Plugin : IPlugin, ICommonPlugin
 
         Log.Info("Loading");
 
-        var configPath = Path.Combine(MyFileSystem.UserDataPath, ConfigFileName);
+        var configPath = Path.Combine(MyFileSystem.UserDataPath, "Storage", ConfigFileName);
         config = PersistentConfig<PluginConfig>.Load(Log, configPath);
 
         // TODO: An option added later can default differently on a new deployment than on an existing one:

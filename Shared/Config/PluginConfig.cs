@@ -8,7 +8,7 @@ public class PluginConfig : IPluginConfig
 {
     public event PropertyChangedEventHandler PropertyChanged;
 
-    private void SetValue<T>(ref T field, T value, [CallerMemberName] string propName = "")
+    protected void SetValue<T>(ref T field, T value, [CallerMemberName] string propName = "")
     {
         if (EqualityComparer<T>.Default.Equals(field, value))
             return;
@@ -18,7 +18,7 @@ public class PluginConfig : IPluginConfig
         OnPropertyChanged(propName);
     }
 
-    private void OnPropertyChanged([CallerMemberName] string propName = "")
+    protected virtual void OnPropertyChanged([CallerMemberName] string propName = "")
     {
         PropertyChangedEventHandler propertyChanged = PropertyChanged;
         if (propertyChanged == null)
@@ -30,7 +30,7 @@ public class PluginConfig : IPluginConfig
     private bool enabled = true;
 
     // TODO: Implement your config fields here
-    // The default values here will apply to Client and Dedicated.
+    // These defaults apply to both the client and the dedicated server.
 
     public bool Enabled
     {

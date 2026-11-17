@@ -1,11 +1,9 @@
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using System.Text;
 using ClientPlugin.Settings;
 using ClientPlugin.Settings.Elements;
 using ClientPlugin.Settings.Tools;
 using Sandbox.Graphics.GUI;
+using Shared.Config;
 using VRage.Input;
 using VRageMath;
 
@@ -20,7 +18,7 @@ public enum ExampleEnum
     Epsilon,
 }
 
-public class Config : INotifyPropertyChanged
+public class Config : PluginConfig
 {
     #region Options
 
@@ -50,7 +48,7 @@ public class Config : INotifyPropertyChanged
     public bool Toggle
     {
         get => toggle;
-        set => SetField(ref toggle, value);
+        set => SetValue(ref toggle, value);
     }
 
     [Slider(
@@ -64,7 +62,7 @@ public class Config : INotifyPropertyChanged
     public int Integer
     {
         get => integer;
-        set => SetField(ref integer, value);
+        set => SetValue(ref integer, value);
     }
 
     [Slider(
@@ -78,21 +76,21 @@ public class Config : INotifyPropertyChanged
     public float Number
     {
         get => number;
-        set => SetField(ref number, value);
+        set => SetValue(ref number, value);
     }
 
     [Textbox(description: "Textbox Tooltip")]
     public string Text
     {
         get => text;
-        set => SetField(ref text, value);
+        set => SetValue(ref text, value);
     }
 
     [Dropdown(description: "Dropdown Tooltip")]
     public ExampleEnum Dropdown
     {
         get => dropdown;
-        set => SetField(ref dropdown, value);
+        set => SetValue(ref dropdown, value);
     }
 
     [Separator("More settings")]
@@ -100,21 +98,21 @@ public class Config : INotifyPropertyChanged
     public Color Color
     {
         get => color;
-        set => SetField(ref color, value);
+        set => SetValue(ref color, value);
     }
 
     [Color(hasAlpha: true, description: "RGBA color")]
     public Color ColorWithAlpha
     {
         get => colorWithAlpha;
-        set => SetField(ref colorWithAlpha, value);
+        set => SetValue(ref colorWithAlpha, value);
     }
 
     [Keybind(description: "Keybind Tooltip - Unbind by right clicking the button")]
     public Binding Keybind
     {
         get => keybind;
-        set => SetField(ref keybind, value);
+        set => SetValue(ref keybind, value);
     }
 
     [Button(description: "Button Tooltip")]
@@ -133,26 +131,6 @@ public class Config : INotifyPropertyChanged
 
     #endregion
 
-    #region Property change notification boilerplate
-
     public static readonly Config Default = new Config();
     public static readonly Config Current = ConfigStorage.Load();
-
-    public event PropertyChangedEventHandler PropertyChanged;
-
-    protected virtual void OnPropertyChanged(string propertyName)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
-
-    private bool SetField<T>(ref T field, T value, [CallerMemberName] string propertyName = null)
-    {
-        if (EqualityComparer<T>.Default.Equals(field, value))
-            return false;
-        field = value;
-        OnPropertyChanged(propertyName);
-        return true;
-    }
-
-    #endregion
 }

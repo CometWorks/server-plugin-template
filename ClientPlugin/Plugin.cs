@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Threading;
 using ClientPlugin.Settings;
 using ClientPlugin.Settings.Layouts;
@@ -35,9 +34,7 @@ public class Plugin : IPlugin, ICommonPlugin
     public IPluginLogger Log => Logger;
     private static readonly IPluginLogger Logger = new PluginLogger(Name);
 
-    public IPluginConfig Config => config?.Data;
-    private PersistentConfig<PluginConfig> config;
-    private static readonly string ConfigFileName = $"{Name}.cfg";
+    public IPluginConfig Config => ClientPlugin.Config.Current;
 
     [System.Runtime.CompilerServices.MethodImpl(
         System.Runtime.CompilerServices.MethodImplOptions.NoInlining
@@ -53,12 +50,6 @@ public class Plugin : IPlugin, ICommonPlugin
         Instance.settingsGenerator = new SettingsGenerator();
 
         Log.Info("Loading");
-
-        var configPath = Path.Combine(MyFileSystem.UserDataPath, ConfigFileName);
-        config = PersistentConfig<PluginConfig>.Load(Log, configPath);
-
-        // TODO: An option added later can default differently on a new deployment than on an existing one:
-        // if (config.IsNewDeployment) config.Data.NewOption = true;
 
         var gameVersion = MyFinalBuildConstants.APP_VERSION_STRING.ToString();
         Common.SetPlugin(this, gameVersion, MyFileSystem.UserDataPath);
